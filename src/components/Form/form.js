@@ -1,18 +1,18 @@
 import React from 'react';
 import { FormValidation } from '../FormValidation/formValidation';
 import { withRouter } from 'react-router-dom';
+import PropTypes from 'prop-types';
+
 class SignUpForm extends React.Component {
 
 
-    constructor() {
-        super();
+    constructor(props) {
+        super(props);
 
         this.state = {
-            email: '',
             first: '',
             last: '',
-            formErrors: { email: '', first: '', last: '' },
-            isEmailValid: false,
+            formErrors: { first: '', last: '' },
             isFirstNameValid: false,
             isLastNameValid: false,
             isFormValid: false
@@ -22,36 +22,30 @@ class SignUpForm extends React.Component {
         this.handleSubmit = this.handleSubmit.bind(this);
     }
 
-    handleChange(e) {
-        let target = e.target;
-        let value = target.value;
-        let name = target.name;
+     handleChange = e => {
+        const target = e.target;
+        const value = target.value;
+        const fieldName = target.name;
 
         this.setState({
-            [name]: value
+            [fieldName]: value
         }, () => {
-            this.validateField(name, value)
+            this.validateField(fieldName, value)
         });
     }
 
-    validateField(fieldName, value) {
-        let fieldValidationErrors = this.state.formErrors;
-        let isEmailValid = this.state.isEmailValid;
+    validateField = (fieldName, value) => {
+        const fieldValidationErrors = this.state.formErrors;
         let isFirstNameValid = this.state.isFirstNameValid;
         let isLastNameValid = this.state.isLastNameValid;
 
         switch (fieldName) {
-            case 'email':
-                isEmailValid = value.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
-                fieldValidationErrors.email = isEmailValid ? '' : ' is invalid';
-                break;
             case 'first':
-                isFirstNameValid = value.match(/^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$/i);
+                isFirstNameValid = value.match(/^[a-zA-Z][a-zA-Z]{1,20}$/i);
                 fieldValidationErrors.first = isFirstNameValid ? '' : ' must have 2-20 letters';
                 break;
             case 'last':
-
-                isLastNameValid = value.match(/^[a-zA-Z][a-zA-Z0-9-_\.]{1,20}$/i);
+                isLastNameValid = value.match(/^[a-zA-Z][a-zA-Z]{1,20}$/i);
                 fieldValidationErrors.last = isLastNameValid ? '' : ' must have 2-20 letters';
                 break;
             default:
@@ -59,15 +53,16 @@ class SignUpForm extends React.Component {
         }
         this.setState({
             formErrors: fieldValidationErrors,
-            isEmailValid: isEmailValid,
             isFirstNameValid: isFirstNameValid,
             isLastNameValid: isLastNameValid
         }, this.validateForm);
     }
 
-    validateForm() {
+
+
+    validateForm = () => {
         this.setState({
-            isFormValid: this.state.isEmailValid &&
+            isFormValid: 
                 this.state.isFirstNameValid &&
                 this.state.isLastNameValid
         });
@@ -75,12 +70,15 @@ class SignUpForm extends React.Component {
 
     }
 
-    handleSubmit(e) {
+    handleSubmit = e => {
         e.preventDefault();
 
         let { history } = this.props;
-        history.push({
-            pathname: '/user/' + this.state.first + '_' + this.state.last
+
+        history.push('/user/', {
+            firstName: this.state.first,
+            lastName: this.state.last,
+            isValid: this.state.isFormValid 
         });
 
     }
@@ -89,51 +87,51 @@ class SignUpForm extends React.Component {
         return (error.length === 0 ? '' : 'has-error');
     }
 
-    disabledSignUpButton() {
-        return (!this.state.isFormValid ? 'disabled' : 'false');
-
-    }
 
     render() {
+        const {first, last, formErrors, isFormValid} = this.state;
         return (
-
-            <div className="container-fluid col-sm-5">
-
-                <form onSubmit={this.handleSubmit}>
-                    <div className={`form-group row ${this.errorClass(this.state.formErrors.first)}`}>
+            
+                <form className="container-fluid col-sm-5" onSubmit={this.handleSubmit}>
+                    <div className={`form-group row ${this.errorClass(formErrors.first)}`}>
                         <label className="col-sm-2 col-form-label" htmlFor="firstName">First Name: </label>
                         <div className="col-sm-10">
-                            <input type="text" required class="form-control" id="firstName" value={this.state.first} onChange={this.handleChange} maxLength="20" minLength="2" placeholder="Enter your first Name" name="first" />
-                        </div>
-                    </div>
-                    <div className={`form-group row ${this.errorClass(this.state.formErrors.last)}`}>
-                        <label className="col-sm-2 col-form-label" htmlFor="lastName">Last Name: </label>
-                        <div className="col-sm-10">
-                            <input type="text" required class="form-control" id="lastName" value={this.state.last} onChange={this.handleChange} maxLength="20" minLength="2" placeholder="Enter your last Name" name="last" />
-                        </div>
-                    </div>
-                    <div className={`form-group row ${this.errorClass(this.state.formErrors.email)}`}>
-                        <label className="col-sm-2 col-form-label" htmlFor="email">email: </label>
-                        <div className="col-sm-10">
-                            <input type="email" required class="form-control" id="email" value={this.state.email} onChange={this.handleChange} placeholder="Enter your email address" name="email" />
+                            <input type="text" required class="form-control" id="firstName" value={first} onChange={this.handleChange} maxLength="20" minLength="2" placeholder="Enter your first Name" name="first" />
                         </div>
                     </div>
 
+                    <div className={`form-group row ${this.errorClass(formErrors.last)}`}>
+                        <label className="col-sm-2 col-form-label" htmlFor="lastName">Last Name: </label>
+                        <div className="col-sm-10">
+                            <input type="text" required class="form-control" id="lastName" value={last} onChange={this.handleChange} maxLength="20" minLength="2" placeholder="Enter your last Name" name="last" />
+                        </div>
+                    </div>
+
+
                     <div className="form-group">
-                        <button class="btn btn-primary" disabled={!this.state.isFormValid} type="submit" >Sign-Up</button>
+                        <button class="btn btn-primary" disabled={!isFormValid} type="submit" >Continue</button>
+                    </div>
+
+
+                    <div className="panel panel-default text-danger">
+                        <FormValidation formErrors={formErrors} />
                     </div>
 
                 </form>
-                <div className="panel panel-default text-danger">
-                    <FormValidation formErrors={this.state.formErrors} />
-                </div>
-
-            </div>
-
-
 
         );
     }
 }
+
+SignUpForm.PropTypes = {
+    first: PropTypes.string,
+    last: PropTypes.string,
+    formErrors: PropTypes.arrayOf(PropTypes.string),
+    isEmailValid: PropTypes.bool,
+    isFirstNameValid: PropTypes.bool,
+    isLastNameValid: PropTypes.bool,
+    isFormValid: PropTypes.bool
+
+};
 
 export default withRouter(SignUpForm);
